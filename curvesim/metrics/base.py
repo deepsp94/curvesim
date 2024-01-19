@@ -372,7 +372,13 @@ def get_numeraire(coins):
     Returns a preferred numeraire from the provided list of coins.
     """
     numeraire = coins[0]
-    preferred = ["USDC", "USDT", "CRVUSD", "ETH", "WETH", "CRV"]
+    # Note: Added "terra-luna-2" because BTC is not a suitable numeraire given
+    # low volumes and high unit price of BTC. "terra-luna-2" is the id for
+    # LUNA on coingecko. This needs to be changed to a more general solution.
+    preferred = [
+        "USDC", "USDT", "CRVUSD", "ETH", "WETH", "CRV",
+        "terra-luna-2"
+    ]
 
     # Heuristic: base coin in pool of derivatives
     base = min(coins, key=len).upper()
