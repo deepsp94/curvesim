@@ -8,14 +8,16 @@ from curvesim.network import coingecko as _coingecko
 logger = get_logger(__name__)
 
 
-def coingecko(coins, chain="mainnet", days=60, end=None):
+def coingecko(addresses, symbols, chain="mainnet", days=60, end=None):
     """
     Fetch CoinGecko price data for specified coins.
 
     Parameters
     ----------
-    coins : list of str
-        List of coin symbols to fetch data for.
+    addresses : list of str
+        List of addresses to fetch data for.
+    symbols : list of str
+        List of symbols. May be used to fetch data if addresses are not found.
     chain : str, optional
         Blockchain network to consider. Default is "mainnet".
     days : int, optional
@@ -30,7 +32,9 @@ def coingecko(coins, chain="mainnet", days=60, end=None):
         Tuple of prices, volumes, and pzero (fixed as 0 for this function).
     """
     logger.info("Fetching CoinGecko price data...")
-    prices, volumes = _coingecko.pool_prices(coins, "usd", days, chain=chain, end=end)
+    prices, volumes = _coingecko.pool_prices(
+        addresses, symbols, "usd", days, chain=chain, end=end
+    )
     pzero = 0
 
     return prices, volumes, pzero

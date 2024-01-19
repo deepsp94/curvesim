@@ -13,7 +13,8 @@ from .sources import coingecko
 
 
 def get(
-    coins,
+    addresses,
+    symbols,
     chain="mainnet",
     *,
     days=60,
@@ -28,8 +29,12 @@ def get(
 
     Parameters
     ----------
-    coins : list of str
+    addresses : list of str
         List of coin addresses.
+
+    symbols : list of str
+        List of coin symbols. May be tried to pull data from Coingecko if
+        addresses are not found.
 
     days : int, default=60
         Number of days to pull data for.
@@ -54,7 +59,9 @@ def get(
 
     """
     if src == "coingecko":
-        prices, volumes, pzero = coingecko(coins, chain=chain, days=days, end=end)
+        prices, volumes, pzero = coingecko(
+            addresses, symbols, chain=chain, days=days, end=end
+        )
 
     elif src == "nomics":
         raise NetworkError("Nomics data is no longer supported.")

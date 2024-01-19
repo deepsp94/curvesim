@@ -9,7 +9,9 @@ import numpy as np
 import pandas as pd
 
 from curvesim.utils import get_pairs
+from curvesim.exceptions import HttpClientError
 
+from tenacity import RetryError
 from .http import HTTP
 from .utils import sync
 
@@ -90,15 +92,19 @@ async def _pool_prices(coins, vs_currency, days, end=None):
     return qprices, qvolumes
 
 
-def pool_prices(coins, vs_currency, days, chain="mainnet", end=None):
+def pool_prices(
+        addresses, symbols, vs_currency, days, chain="mainnet", end=None
+):
     """
     Pull price and volume data for given coins, quoted in given
     quote currency for given days.
 
     Parameters
     ----------
-    coins: list of str
+    addresses: list of str
         List of coin addresses.
+    symbols: list of str
+        List of coin symbols. May be used to fetch data if addresses not found.
     vs_currency: str
         Symbol for quote currency.
     days: int
@@ -110,7 +116,16 @@ def pool_prices(coins, vs_currency, days, chain="mainnet", end=None):
         prices Series and volumes Series
     """
     # Get data
-    coins = coin_ids_from_addresses_sync(coins, chain)
+    addresses_only = [addr for addr in addresses if addr != ""]
+    ids_from_addresses = coin_ids_from_addresses_sync(addresses_only, chain)
+    coins = []
+    j = 0
+    for i, addr in enumerate(addresses):
+        if addr == "":
+            coins.append(symbols[i])
+        else:
+            coins.append(ids_from_addresses[j])
+            j += 1
     qprices, qvolumes = _pool_prices_sync(coins, vs_currency, days, end)
 
     # Compute prices by coin pairs
@@ -142,9 +157,7 @@ async def _coin_id_from_address(address, chain):
     url = URL + f"coins/{chain}/contract/{address}"
 
     r = await HTTP.get(url)
-
     coin_id = r["id"]
-
     return coin_id
 
 

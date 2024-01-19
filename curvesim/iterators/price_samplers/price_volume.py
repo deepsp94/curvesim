@@ -59,6 +59,7 @@ class PriceVolume(PriceSampler):
         """
         prices, volumes, _ = get(
             assets.addresses,
+            assets.symbols,
             chain=assets.chain,
             days=days,
             data_dir=data_dir,
